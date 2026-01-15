@@ -1,4 +1,4 @@
-export default class CheckoutInfo{
+export default class FillUpcheckOutInformation{
     constructor (page){
         this.page = page;
         this.firstName = page.locator('[data-test="firstName"]');
@@ -7,7 +7,7 @@ export default class CheckoutInfo{
         this.continueBtn = page.locator('[data-test="continue"]');
     }
 
-    async FillUpcheckOutInformation(firstName, lastName, postalCode){
+    async userInfo(firstName, lastName, postalCode){
         await this.firstName.fill(firstName);
         await this.lastName.fill(lastName);
         await this.postCode.fill(postalCode);

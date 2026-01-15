@@ -3,23 +3,18 @@ import excelReader from '../utils/excelReader.js';
 import LoginPage from '../pages/LoginPage.js'; 
 import DashboardPage from '../pages/DashboardPage.js';
 import CartPage from '../pages/CartPage.js';
-import CheckoutInfo from '../pages/naveed_page/CheckoutInfo.js';
+import FillUpcheckOutInformation from '../pages/naveed_page/CheckoutInfo.js';
 import CheckoutOverview from '../pages/naveed_page/CheckoutOverview.js';
 import CheckoutComplete from '../pages/naveed_page/CheckoutComplete.js';
 
 test.describe('Product Order', () => {
-    let login;
-    let dashBoadrd;
-    let cartPg;
-    let checkOutIn;
-    let checkOutOver;
-    let checkOutComp;
+    let login, dashBoadrd, cartPg, checkOutIn, checkOutOver, checkOutComp;
 
     test.beforeEach(async ({ page }) => {
         login = new LoginPage(page);
         dashBoadrd = new DashboardPage(page);
         cartPg = new CartPage(page);
-        checkOutIn = new CheckoutInfo(page);
+        checkOutIn = new FillUpcheckOutInformation(page);
         checkOutOver = new CheckoutOverview(page);
         checkOutComp = new CheckoutComplete(page);
     });
@@ -61,7 +56,7 @@ test.describe('Product Order', () => {
         });
 
         await test.step('Checkout info page', async () => {
-            await checkOutIn.FillUpcheckOutInformation(firstName, lastName, postalCode);
+            await checkOutIn.userInfo(firstName, lastName, postalCode);
             await checkOutIn.clickContinueBtn();
         });
 
