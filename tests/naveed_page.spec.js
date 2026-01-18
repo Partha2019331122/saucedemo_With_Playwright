@@ -33,7 +33,7 @@ test.describe('Product Order', () => {
         const lastName = "Last Name";
         const postalCode = "1A1A1A";
         const totalPrice_amount = "Total: $53.99"
-        const thankYou_text = "Thank you for your order!";
+        const doneText = "Thank you for your order!";
 
         await test.step('Login to Application', async () => {
             await login.navigateToLoginPage();
@@ -67,7 +67,7 @@ test.describe('Product Order', () => {
         });
 
         await test.step('Checkout complete', async () => {        
-            await checkOutComp.checkoutCompletePage(thankYou_text);
+            await checkOutComp.checkoutCompletePage(doneText);
         });
 
         await test.step('Post conditions', async () => {        
