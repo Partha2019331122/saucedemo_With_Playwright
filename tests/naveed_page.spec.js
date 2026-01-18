@@ -56,7 +56,7 @@ test.describe('Product Order', () => {
         });
 
         await test.step('Checkout info page', async () => {
-            await checkOutIn.userInfo(firstName, lastName, postalCode);
+            await checkOutIn.FillUpUserInfo(firstName, lastName, postalCode);
             await checkOutIn.clickContinueBtn();
         });
 

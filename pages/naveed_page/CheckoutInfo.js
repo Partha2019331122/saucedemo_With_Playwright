@@ -7,7 +7,7 @@ export default class FillUpcheckOutInformation{
         this.continueBtn = page.locator('[data-test="continue"]');
     }
 
-    async userInfo(firstName, lastName, postalCode){
+    async FillUpUserInfo(firstName, lastName, postalCode){
         await this.firstName.fill(firstName);
         await this.lastName.fill(lastName);
         await this.postCode.fill(postalCode);
