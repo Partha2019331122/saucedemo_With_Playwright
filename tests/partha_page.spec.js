@@ -1,96 +1,93 @@
 import { test, expect } from '@playwright/test';
 import excelReader from '../utils/excelReader.js';
-import LoginPage from '../pages/LoginPage.js'; 
+import LoginPage from '../pages/LoginPage.js';
 import DashboardPage from '../pages/DashboardPage.js';
 import CartPage from '../pages/CartPage.js';
-import Checkout from '../pages/partha_pages/Checkout.js';
+import CheckoutInfo from '../pages/partha_pages/CheckoutInfo.js'
+import CheckoutOverview from '../pages/partha_pages/CheckoutOverview.js';
+import CheckoutComplete from '../pages/partha_pages/CheckoutComplete.js';
 
-test('Page Objet Model', async ({ page }) => {
-  // 1. Navigate to Application
-  // 2. Login to Application
-  const loginCredentials = excelReader.getLoginCredentials(0);
-  const username =loginCredentials.username;
-  const password =loginCredentials.password;
-  const login = new LoginPage(page);
-  const dashBoard = new DashboardPage(page);
-  await test.step('Navigate & Login to Application', async() =>{
-    await login.navigateToLoginPage();
-    await login.doLogin(username,password);
-    await dashBoard.isOnDashboard();
-  });
+test.describe('SauceDemo POM Flow', () => {
+  test('Page Objet Model', async ({ page }) => {
+   
+    const loginCredentials = excelReader.getLoginCredentials(0);
+    const username = loginCredentials.username;
+    const password = loginCredentials.password;
+    const login = new LoginPage(page);
+    const dashBoard = new DashboardPage(page);
+    const cartPage = new CartPage(page);
+    const checkOutInfo = new CheckoutInfo(page);
+    const checkOutOverview = new CheckoutOverview(page);
+    const checkOutComplete = new CheckoutComplete(page);
 
-  // 3. Verify Product Availability on Inventory Page
+    // 1. Navigate to Application
+    // 2. Login to Application
+    await test.step('Navigate & Login to Application', async () => {
+      await login.navigateToLoginPage();
+      await login.doLogin(username, password);
+      await dashBoard.isOnDashboard();
+    });
 
-  /* Sauce Labs Fleece Jacket	
-  It's not every day that you come across a midweight quarter-zip fleece jacket	
-  $49.99*/
+    // 3. Verify Product Availability on Inventory Page
+    // 4. Add Product to Cart
+    const product = excelReader.getProductByIndex(3);
+    const productName = product.productName;
+    const price = product.price;
 
-  const product = excelReader.getProductByIndex(3);
-  const productName = product.productName;
-  const price = product.price;
+    await test.step('Verify Product Availability & Add Product to Cart', async () => {
+      await dashBoard.isProductDisplayed(productName);
+      await dashBoard.addProductToCartByName(productName);
+      await expect(
+        page.locator(`[data-test="remove-sauce-labs-fleece-jacket"]`)
+      ).toHaveText('Remove');
+    });
 
-  await test.step('Verify Product Availability', async() =>{
-    await dashBoard.isProductDisplayed(productName);
-  });
+    //5. Verify Cart Badge Increment 
+    //6. Navigate to Cart Page
+    await test.step('Verify Cart Badge Increment & Navigate to Cart Page', async () => {
+      await dashBoard.verifyCartBadgeCount(1);
+      await dashBoard.clickCartIcon();
+    });
 
-  // 4. Add Product to Cart
-  await test.step('Add Product to Cart', async() =>{
-    await dashBoard.addProductToCartByName(productName);
+    //7. Verify Product Details on Cart Page
+    //8. Proceed to Checkout
+    await test.step('Verify Product Details on Cart Page & Proceed to Checkout', async () => {
+      await cartPage.verifyCartPageVisible();
+      await cartPage.getProductDetails(productName);
+      await cartPage.clickCheckout();
+    });
 
-    await expect(
-      page.locator(`[data-test="remove-sauce-labs-fleece-jacket"]`)
-    ).toHaveText('Remove');
-  });
+    //9. Fill Checkout Information
+    await test.step('Fill Checkout Information', async () => {
+      await checkOutInfo.fillUpUserInfo('Partha', 'Sarothi', '3570');
+      await checkOutInfo.clickContinueBtn();
+    });
 
-  //5. Verify Cart Badge Increment
-  await test.step('Verify Cart Badge Increment', async() =>{
-    await dashBoard.verifyCartBadgeCount(1);
-  });
+    //10. Verify Checkout Overview Details
+    const totalPriceAmount = "Total: $53.99";
+    await test.step('Verify Checkout Overview', async () => {
+      await expect(checkOutOverview.getProductName()).toContainText(productName);
+      await expect(checkOutOverview.getProductQuantity()).toHaveCount(1);
+      await expect(checkOutOverview.getProductPrice()).toContainText(price);
+      await expect(checkOutOverview.getTotalPrice()).toContainText(totalPriceAmount);
+      await checkOutOverview.clickFinishBtn();
+    });
 
-  //6. Navigate to Cart Page
-  await test.step('Navigate to Cart Page', async() =>{
-    await dashBoard.clickCartIcon();  
-  });
+    //11. Complete the Order
+    //12. Verify Order Completion Page
+    const doneText = "Thank you for your order!";
+    await test.step('Complete the Order & Verify', async () => {
+      await expect(checkOutComplete.getSuccessText()).toContainText(doneText);
+      await expect(checkOutComplete.getSuccessIcon()).toBeVisible();
+      await checkOutComplete.backToProducts();
+    });
 
-  //7. Verify Product Details on Cart Page
-  const cartPage = new CartPage(page);
-  await test.step('Verify Product Details on Cart Page', async () => {
-    await cartPage.verifyCartPageVisible();
-    await cartPage.getProductDetails(productName);
-  });
+    //13. Navigate Back to Dashboard
+    await test.step('Navigate to Dashboard & Post conditions', async () => {
+      await dashBoard.verifyDashboardVisible();
+      await dashBoard.verifyCartBadgeCount(0);
+    });
 
-  //8. Proceed to Checkout
-  await test.step('Proceed to Checkout', async () => {
-    await cartPage.clickCheckout();
-  });
-  
-  //9. Fill Checkout Information
-  const checkOut = new Checkout(page);
-  await test.step('Fill Checkout Information', async () => {
-    await checkOut.fillUpUserInfo('Partha','Sarothi','3570');
-    await checkOut.clickContinueBtn();
-  });
-
-  //10. Verify Checkout Overview Details
-  const totalPriceAmount = "Total: $53.99";
-  await test.step('Verify Checkout Overview', async () => {        
-    await checkOut.verifyProductDetails(productName, price);
-    await checkOut.verifyTotalPrice(totalPriceAmount);
-    await checkOut.clickFinishBtn();
-  });
-  
-  //11. Complete the Order
-  //12. Verify Order Completion Page
-  const doneText = "Thank you for your order!";
-  await test.step('Complete the Order & Verify', async () => {        
-    await checkOut.verifyCheckoutComplete(doneText);
-    await checkOut.backToProducts();
-  });
-
-  //13. Navigate Back to Dashboard
-  await test.step('Navigate to Dashboard & Post conditions', async () => {        
-    await dashBoard.verifyDashboardVisible();
-    await dashBoard.verifyCartBadgeCount(0);
   });
 
 });
